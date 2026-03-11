@@ -9,11 +9,11 @@ const axios = require('axios');
 // Configuración desde variables de entorno
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
 const PHONE_ID = process.env.PHONE_ID;
-const SHEET_ID = process.env.SHEET_ID;
+const spreadsheetId = "1NKpVT-u2h0ZVlZ-gqW8qmnd84Ijsu2Q-LEf_RH7UBwM";
 
 // URL de la Google Sheets API
 const SHEETS_API_BASE = 'https://sheets.googleapis.com/v4/spreadsheets';
-const SHEET_RANGE = 'familias!A1:Z'; // Rango amplio para cubrir todas las columnas
+const range = "Configuración de Google Sheet para Base de Datos!A1:Y";
 
 /**
  * Obtiene los datos del Google Sheet
@@ -21,7 +21,7 @@ const SHEET_RANGE = 'familias!A1:Z'; // Rango amplio para cubrir todas las colum
  */
 async function obtenerDatosSheet() {
     try {
-        const url = `${SHEETS_API_BASE}/${SHEET_ID}/values/${SHEET_RANGE}?key=${process.env.GOOGLE_API_KEY}`;
+        const url = `${SHEETS_API_BASE}/${spreadsheetId}/values/${range}?key=${process.env.GOOGLE_API_KEY}`;
         const response = await axios.get(url);
 
         const rows = response.data.values;
