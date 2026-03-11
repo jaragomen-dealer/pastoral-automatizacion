@@ -23,6 +23,9 @@ async function obtenerDatosSheet() {
 
     const sheets = google.sheets({ version: 'v4', auth });
 
+    console.log("SHEET_ID:", process.env.SHEET_ID);
+    console.log("RANGE:", "A:K");
+
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId: process.env.SHEET_ID,
         range: "A:K",
