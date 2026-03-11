@@ -26,10 +26,15 @@ async function obtenerDatosSheet() {
     console.log("SHEET_ID:", process.env.SHEET_ID);
     console.log("RANGE:", "A:K");
 
+    const authClient = await auth.getClient();
+
     const response = await sheets.spreadsheets.values.get({
+        auth: authClient,
         spreadsheetId: process.env.SHEET_ID,
         range: "A:K",
     });
+
+    console.log("Datos obtenidos:", response.data.values?.length);
 
     const rows = response.data.values;
     if (!rows || rows.length === 0) {
