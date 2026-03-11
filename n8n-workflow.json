@@ -1,0 +1,297 @@
+{
+  "name": "Automatización Pastoral - Diaria",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "id": "b1c2e3f4-5g6h-7i8j-9k0l-m1n2o3p4q5r6",
+      "name": "Ejecutar diariamente a las 9 AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        250,
+        300
+      ],
+      "webhookId": "",
+      "notes": "Se ejecuta todos los días a las 9:00 AM"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://tu-app-en-railway.railway.app/run-automatizacion",
+        "authentication": "none",
+        "sendHeaders": false,
+        "headerParameters": {
+          "parameters": []
+        },
+        "sendBody": false,
+        "specifyBody": "json",
+        "jsonBody": "={}",
+        "options": {
+          "timeout": 30000,
+          "redirect": {
+            "redirect": {
+              "followRedirects": true,
+              "maxRedirects": 10
+            }
+          }
+        }
+      },
+      "id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
+      "name": "Ejecutar Automatización Pastoral",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        450,
+        300
+      ],
+      "notes": "Llama al endpoint HTTP de Railway"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "operation": "equals",
+              "value2": "ok"
+            }
+          ]
+        }
+      },
+      "id": "c1d2e3f4-a5b6-c7d8-e9f0-g1h2i3j4k5l6",
+      "name": "Verificar Status",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        650,
+        300
+      ],
+      "notes": "Verifica si la respuesta es OK"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.mensajes_enviados }}",
+              "operation": "exists"
+            }
+          ]
+        }
+      },
+      "id": "d1e2f3g4-h5i6-j7k8-l9m0-n1o2p3q4r5s6",
+      "name": "Verificar Mensajes Enviados",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        850,
+        200
+      ],
+      "notes": "Verifica si hubo mensajes enviados"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p",
+              "name": "mensaje",
+              "value": "=✅ Automatización Pastoral Ejecutada\n\n📅 Fecha: {{ $now.toISO() }}\n📱 Mensajes enviados: {{ $json.mensajes_enviados }}\n\nEl proceso se completó exitosamente.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e1f2g3h4-i5j6-k7l8-m9n0-o1p2q3r4s5t6",
+      "name": "Mensaje de Éxito",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [
+        1050,
+        100
+      ],
+      "notes": "Formatea mensaje de éxito"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2b3c4d5e-6f7g-8h9i-0j1k-2l3m4n5o6p7q",
+              "name": "mensaje",
+              "value": "=ℹ️ Automatización Pastoral\n\n📅 Fecha: {{ $now.toISO() }}\nℹ️ No hay celebraciones hoy\n\nNo se enviaron mensajes.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f1g2h3i4-j5k6-l7m8-n9o0-p1q2r3s4t5u6",
+      "name": "Mensaje Sin Celebraciones",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [
+        1050,
+        300
+      ],
+      "notes": "Formatea mensaje sin celebraciones"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3c4d5e6f-7g8h-9i0j-1k2l-3m4n5o6p7q8r",
+              "name": "mensaje",
+              "value": "=❌ Error en Automatización Pastoral\n\n📅 Fecha: {{ $now.toISO() }}\n❌ Error: {{ $json.mensaje }}\n\nPor favor revisar los logs en Railway.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "g1h2i3j4-k5l6-m7n8-o9p0-q1r2s3t4u5v6",
+      "name": "Mensaje de Error",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [
+        850,
+        500
+      ],
+      "notes": "Formatea mensaje de error"
+    },
+    {
+      "parameters": {
+        "content": "={{ $json.mensaje }}",
+        "chatId": "TU_CANAL_O_CHAT_ID"
+      },
+      "id": "h1i2j3k4-l5m6-n7o8-p9q0-r1s2t3u4v5w6",
+      "name": "Enviar Notificación",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.0,
+      "position": [
+        1250,
+        200
+      ],
+      "notes": "Envía notificación a Slack (opcional)",
+      "credentials": {
+        "slackApi": {
+          "id": "CREDENCIALES_SLACK",
+          "name": "Slack API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Ejecutar diariamente a las 9 AM": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar Automatización Pastoral",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ejecutar Automatización Pastoral": {
+      "main": [
+        [
+          {
+            "node": "Verificar Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Status": {
+      "main": [
+        [
+          {
+            "node": "Verificar Mensajes Enviados",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensaje de Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Mensajes Enviados": {
+      "main": [
+        [
+          {
+            "node": "Mensaje de Éxito",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensaje Sin Celebraciones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensaje de Éxito": {
+      "main": [
+        [
+          {
+            "node": "Enviar Notificación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensaje Sin Celebraciones": {
+      "main": [
+        [
+          {
+            "node": "Enviar Notificación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensaje de Error": {
+      "main": [
+        [
+          {
+            "node": "Enviar Notificación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2024-03-11T00:00:00.000Z",
+  "versionId": "1a2b3c4d-5e6f-7g8h-9i0j-1k2l3m4n5o6p7"
+}
