@@ -17,15 +17,14 @@ const PHONE_ID = process.env.PHONE_ID;
  */
 async function obtenerDatosSheet() {
     try {
+        console.log("📊 Obteniendo datos del Google Sheet...");
+
         const auth = new google.auth.GoogleAuth({
             credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
             scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
         });
 
         const sheets = google.sheets({ version: 'v4', auth });
-
-        console.log("SHEET_ID:", process.env.SHEET_ID);
-        console.log("RANGE:", "A:K");
 
         const authClient = await auth.getClient();
 
@@ -35,7 +34,7 @@ async function obtenerDatosSheet() {
             range: "A:K",
         });
 
-        console.log("Datos obtenidos:", response.data.values?.length);
+        console.log("✅ Datos obtenidos:", response.data.values?.length);
 
         const rows = response.data.values;
         if (!rows || rows.length === 0) {
@@ -57,7 +56,10 @@ async function obtenerDatosSheet() {
 
         return datos;
     } catch (error) {
-        console.error("❌ ERROR COMPLETO:", error.response?.data || error.message);
+        console.error("❌ ERROR COMPLETO GOOGLE:");
+        console.error("status:", error.response?.status);
+        console.error("data:", error.response?.data);
+        console.error("message:", error.message);
         throw error;
     }
 }
