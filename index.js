@@ -16,45 +16,50 @@ const PHONE_ID = process.env.PHONE_ID;
  * @returns {Promise<Array>} Array de objetos con los datos de las familias
  */
 async function obtenerDatosSheet() {
-    const auth = new google.auth.GoogleAuth({
-        credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
-        scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-    });
-
-    const sheets = google.sheets({ version: 'v4', auth });
-
-    console.log("SHEET_ID:", process.env.SHEET_ID);
-    console.log("RANGE:", "A:K");
-
-    const authClient = await auth.getClient();
-
-    const response = await sheets.spreadsheets.values.get({
-        auth: authClient,
-        spreadsheetId: process.env.SHEET_ID,
-        range: "A:K",
-    });
-
-    console.log("Datos obtenidos:", response.data.values?.length);
-
-    const rows = response.data.values;
-    if (!rows || rows.length === 0) {
-        console.log('No se encontraron datos en la hoja');
-        return [];
-    }
-
-    // La primera fila contiene los encabezados
-    const headers = rows[0];
-
-    // Convertir las filas restantes en objetos
-    const datos = rows.slice(1).map(row => {
-        const obj = {};
-        headers.forEach((header, index) => {
-            obj[header] = row[index] || '';
+    try {
+        const auth = new google.auth.GoogleAuth({
+            credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
+            scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
         });
-        return obj;
-    });
 
-    return datos;
+        const sheets = google.sheets({ version: 'v4', auth });
+
+        console.log("SHEET_ID:", process.env.SHEET_ID);
+        console.log("RANGE:", "A:K");
+
+        const authClient = await auth.getClient();
+
+        const response = await sheets.spreadsheets.values.get({
+            auth: authClient,
+            spreadsheetId: process.env.SHEET_ID,
+            range: "A:K",
+        });
+
+        console.log("Datos obtenidos:", response.data.values?.length);
+
+        const rows = response.data.values;
+        if (!rows || rows.length === 0) {
+            console.log('No se encontraron datos en la hoja');
+            return [];
+        }
+
+        // La primera fila contiene los encabezados
+        const headers = rows[0];
+
+        // Convertir las filas restantes en objetos
+        const datos = rows.slice(1).map(row => {
+            const obj = {};
+            headers.forEach((header, index) => {
+                obj[header] = row[index] || '';
+            });
+            return obj;
+        });
+
+        return datos;
+    } catch (error) {
+        console.error("❌ ERROR COMPLETO:", error.response?.data || error.message);
+        throw error;
+    }
 }
 
 /**
