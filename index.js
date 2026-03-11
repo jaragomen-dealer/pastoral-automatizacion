@@ -25,7 +25,7 @@ async function obtenerDatosSheet() {
 
     const response = await sheets.spreadsheets.values.get({
         spreadsheetId: process.env.SHEET_ID,
-        range: "'Configuración de Google Sheet para Base de Datos'!A:Z",
+        range: "A:K",
     });
 
     const rows = response.data.values;
