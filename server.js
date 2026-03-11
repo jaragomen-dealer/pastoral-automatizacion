@@ -147,7 +147,7 @@ app.use((err, req, res, next) => {
 /**
  * Iniciar el servidor
  */
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
     console.log('╔════════════════════════════════════════════════╗');
     console.log('║   🙏 Automatización Pastoral - Agente HTTP   ║');
     console.log('╚════════════════════════════════════════════════╝');
