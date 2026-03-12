@@ -17,8 +17,9 @@ const PHONE_ID = process.env.PHONE_ID;
 async function obtenerDatosSheet() {
   try {
     console.log("📊 Obteniendo datos del Google Sheet...");
+    console.log("📊 SHEET ID USADO:", process.env.SHEET_ID);
 
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SHEET_ID}/values/A:Z?key=${process.env.GOOGLE_API_KEY}`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SHEET_ID}/values/A2:Z?key=${process.env.GOOGLE_API_KEY}`;
 
     const response = await axios.get(url);
 
