@@ -28,10 +28,12 @@ const PHONE_ID = process.env.PHONE_ID;
 async function obtenerDatosSheet() {
     try {
         console.log("📊 Obteniendo datos del Google Sheet...");
+        console.log("SHEET_ID:", process.env.SHEET_ID);
+        console.log("RANGE:", "'Configuración de Google Sheet para Base de Datos'!A:K");
 
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId: process.env.SHEET_ID,
-            range: "A:K",
+            range: "'Configuración de Google Sheet para Base de Datos'!A:K",
         });
 
         console.log("✅ Filas:", response.data.values?.length);
@@ -57,6 +59,8 @@ async function obtenerDatosSheet() {
         return datos;
     } catch (error) {
         console.error("❌ ERROR REAL:", error.response?.data || error.message);
+        console.error("ERROR STATUS:", error.response?.status);
+        console.error("ERROR DETAILS:", JSON.stringify(error.response?.data, null, 2));
         throw error;
     }
 }
