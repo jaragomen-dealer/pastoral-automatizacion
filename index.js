@@ -32,15 +32,24 @@ async function obtenerDatosSheet() {
   }
 }
 
-function esHoy(fechaStr) {
-  if (!fechaStr) return false;
+function esHoy(valor) {
+  if (!valor) return false;
 
   const hoy = new Date();
-  const [dia, mes] = fechaStr.split("/");
+
+  let fecha;
+
+  if (!isNaN(valor)) {
+    // convertir número serial de Google Sheets a fecha real
+    fecha = new Date((valor - 25569) * 86400 * 1000);
+  } else {
+    const [dia, mes] = valor.split("/");
+    fecha = new Date(hoy.getFullYear(), mes - 1, dia);
+  }
 
   return (
-    parseInt(dia) === hoy.getDate() &&
-    parseInt(mes) === hoy.getMonth() + 1
+    fecha.getDate() === hoy.getDate() &&
+    fecha.getMonth() === hoy.getMonth()
   );
 }
 
