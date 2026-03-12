@@ -1,6 +1,16 @@
 require('dotenv').config();
 const axios = require('axios');
-const { google } = require('googleapis');
+const { google } = require("googleapis");
+
+const auth = new google.auth.GoogleAuth({
+  credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
+  scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+});
+
+const sheets = google.sheets({
+  version: "v4",
+  auth,
+});
 
 /**
  * Script de Automatización Pastoral
@@ -19,22 +29,12 @@ async function obtenerDatosSheet() {
     try {
         console.log("📊 Obteniendo datos del Google Sheet...");
 
-        const auth = new google.auth.GoogleAuth({
-            credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
-            scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-        });
-
-        const sheets = google.sheets({ version: 'v4', auth });
-
-        const authClient = await auth.getClient();
-
         const response = await sheets.spreadsheets.values.get({
-            auth: authClient,
             spreadsheetId: process.env.SHEET_ID,
             range: "A:K",
         });
 
-        console.log("✅ Datos obtenidos:", response.data.values?.length);
+        console.log("✅ Filas:", response.data.values?.length);
 
         const rows = response.data.values;
         if (!rows || rows.length === 0) {
@@ -56,10 +56,7 @@ async function obtenerDatosSheet() {
 
         return datos;
     } catch (error) {
-        console.error("❌ ERROR COMPLETO GOOGLE:");
-        console.error("status:", error.response?.status);
-        console.error("data:", error.response?.data);
-        console.error("message:", error.message);
+        console.error("❌ ERROR REAL:", error.response?.data || error.message);
         throw error;
     }
 }
