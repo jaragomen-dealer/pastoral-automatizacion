@@ -2,8 +2,21 @@ require('dotenv').config();
 const axios = require('axios');
 const { google } = require("googleapis");
 
+let credentials;
+
+// Railway puede montar secrets como archivos o variables de entorno
+if (process.env.GOOGLE_CREDENTIALS) {
+  credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+} else if (process.env.GOOGLE_CREDENTIALS_PATH) {
+  const fs = require('fs');
+  const credentialsPath = process.env.GOOGLE_CREDENTIALS_PATH;
+  credentials = JSON.parse(fs.readFileSync(credentialsPath, 'utf8'));
+} else {
+  throw new Error('GOOGLE_CREDENTIALS o GOOGLE_CREDENTIALS_PATH debe estar definido');
+}
+
 const auth = new google.auth.GoogleAuth({
-  credentials: JSON.parse(process.env.GOOGLE_CREDENTIALS),
+  credentials: credentials,
   scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
 });
 

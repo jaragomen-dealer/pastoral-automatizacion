@@ -1,93 +1,101 @@
-# ❌ Error 400 en Google Sheets - SOLUCIÓN
+# ❌ Error 400 en Railway - SOLUCIÓN DEFINITIVA
 
 ## El Error:
 ```
-Request failed with status code 400
+failed to stat /tmp/railpack-build-386214445/secrets/GOOGLE_CREDENTIALS: no such file or directory
 ```
 
-## Causas Probables:
+## Causa:
+Railway está intentando montar `GOOGLE_CREDENTIALS` como un archivo secreto pero no lo encuentra.
 
-### 1. **SHEET_ID Incorrecto** (Más probable)
-- Verifica que el SHEET_ID en Railway sea correcto
-- Debe ser el ID largo de la URL del Google Sheet
-- Ejemplo: `https://docs.google.com/spreadsheets/d/SHEET_ID/edit`
+## ✅ SOLUCIÓN: Usar variable de entorno en lugar de archivo
 
-### 2. **Nombre de Hoja Incorrecto**
-- El código ahora usa: `'Configuración de Google Sheet para Base de Datos'!A:K`
-- Verifica que tu hoja se llame EXACTAMENTE: "Configuración de Google Sheet para Base de Datos"
-- Si tiene otro nombre, cámbialo en el código
+### Paso 1: En tu Google Sheet
+Abre tu Google Sheet y copia el ID de la URL:
+```
+https://docs.google.com/spreadsheets/d/SHEET_ID/edit
+                                    ^^^^^^^
+```
 
-### 3. **Service Account Sin Permiso**
-- El email del service account debe tener acceso al Google Sheet
-- Ve a tu Sheet → Share → Agrega el email del service account como Editor
-
-## Pasos para Solucionar:
-
-### ✅ Paso 1: Verificar SHEET_ID
-1. Abre tu Google Sheet
-2. Copia el ID de la URL:
-   ```
-   https://docs.google.com/spreadsheets/d/ESTE_ES_EL_ID/edit
-   ```
-3. En Railway, verifica que `SHEET_ID` tenga ese valor
-
-### ✅ Paso 2: Verificar Nombre de Hoja
-1. Abre tu Google Sheet
-2. Mira el nombre de la hoja en la parte inferior
-3. Debe decir EXACTAMENTE: "Configuración de Google Sheet para Base de Datos"
-4. Si no, cópialo y cámbialo en el código
-
-### ✅ Paso 3: Dar Permiso al Service Account
-1. Ve a Google Cloud Console
+### Paso 2: En Google Cloud Console
+1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
 2. IAM & Admin → Service Accounts
-3. Copia el email (algo como `xxx@xxx.iam.gserviceaccount.com`)
-4. Ve a tu Google Sheet
-5. Share → Pega el email
-6. Dale permiso de **Editor**
+3. Crea o selecciona tu service account
+4. Ve a Keys → Add Key → Create New Key → JSON
+5. Se descargará un archivo JSON
 
-### ✅ Paso 4: Verificar GOOGLE_CREDENTIALS
-1. En Railway, verifica que `GOOGLE_CREDENTIALS` sea un JSON válido
-2. Debe tener este formato:
-   ```json
-   {
-     "type": "service_account",
-     "project_id": "...",
-     "private_key_id": "...",
-     "private_key": "...",
-     "client_email": "...",
-     "client_id": "..."
-   }
-   ```
+### Paso 3: Convertir JSON a una línea
+Abre el archivo JSON descargado y elimina todos los saltos de línea:
 
-## Cambios Realizados:
-
-He actualizado el código para:
-- ✅ Usar el rango completo: `'Configuración de Google Sheet para Base de Datos'!A:K`
-- ✅ Agregar logs de debug para ver SHEET_ID y RANGE
-- ✅ Mostrar detalles completos del error
-
-## Prueba de Nuevo:
-
-Después de verificar los pasos anteriores, Railway hará redeploy automático.
-
-Revisa los logs en Railway para ver:
-```
-SHEET_ID: [tu ID]
-RANGE: 'Configuración de Google Sheet para Base de Datos'!A:K
+**Original (con saltos de línea):**
+```json
+{
+  "type": "service_account",
+  "project_id": "my-project",
+  "private_key_id": "key123",
+  "private_key": "-----BEGIN PRIVATE KEY-----\n...",
+  "client_email": "xxx@xxx.iam.gserviceaccount.com",
+  "client_id": "123456789"
+}
 ```
 
-Si el SHEET_ID o el nombre de hoja son incorrectos, cámbialos en Railway.
+**Convertido (una sola línea):**
+```json
+{"type":"service_account","project_id":"my-project","private_key_id":"key123","private_key":"-----BEGIN PRIVATE KEY-----\n...","client_email":"xxx@xxx.iam.gserviceaccount.com","client_id":"123456789"}
+```
 
-## Solución Rápida:
+### Paso 4: En Railway
+1. Ve a tu proyecto en Railway
+2. Variables → New Variable
+3. Nombre: `GOOGLE_CREDENTIALS`
+4. Valor: Pega el JSON de una sola línea
+5. Nombre: `SHEET_ID`
+6. Valor: Pega el ID del Google Sheet (solo la parte larga)
 
-Si el nombre de tu hoja es diferente, cámbialo en el código:
+### Paso 5: Dar permiso al Service Account
+1. Copia el `client_email` del JSON (ej: `xxx@xxx.iam.gserviceaccount.com`)
+2. Ve a tu Google Sheet
+3. Share → Pega el email
+4. Dale permiso de **Editor**
 
-Ejemplo si tu hoja se llama "Hoja 1":
+## Código Actualizado
+
+El código ahora maneja automáticamente:
+- Variables de entorno (`GOOGLE_CREDENTIALS`)
+- Archivos de credenciales (`GOOGLE_CREDENTIALS_PATH`)
+
 ```javascript
-range: "'Hoja 1'!A:K",
+let credentials;
+
+if (process.env.GOOGLE_CREDENTIALS) {
+  credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+} else if (process.env.GOOGLE_CREDENTIALS_PATH) {
+  const fs = require('fs');
+  credentials = JSON.parse(fs.readFileSync(process.env.GOOGLE_CREDENTIALS_PATH, 'utf8'));
+} else {
+  throw new Error('GOOGLE_CREDENTIALS o GOOGLE_CREDENTIALS_PATH debe estar definido');
+}
 ```
 
-O si no tiene espacios:
-```javascript
-range: "Hoja1!A:K",
+## Variables de Entorno Requeridas
+
+```env
+PORT=3000
+WHATSAPP_TOKEN=tu_token_whatsapp
+PHONE_ID=tu_phone_id
+SHEET_ID=tu_sheet_id
+GOOGLE_CREDENTIALS={"type":"service_account",...}
 ```
+
+## Verificar
+
+Después de configurar, Railway hará redeploy automático. Revisa los logs para ver:
+```
+📊 Obteniendo datos del Google Sheet...
+✅ Filas: X
+```
+
+Si ves "Filas: undefined" o un error 400, verifica:
+1. El SHEET_ID sea correcto
+2. El JSON de GOOGLE_CREDENTIALS sea válido
+3. El service account tenga permiso de Editor en el Sheet
