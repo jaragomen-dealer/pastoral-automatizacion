@@ -32,28 +32,16 @@ async function obtenerDatosSheet() {
   }
 }
 
-/**
- * Verifica si una fecha coincide con el día y mes actual
- * @param {string} fechaStr - Fecha en formato DD/MM/YYYY o similar
- * @returns {boolean} True si es hoy
- */
 function esHoy(fechaStr) {
-    if (!fechaStr) return false;
+  if (!fechaStr) return false;
 
-    const hoy = new Date();
-    const diaHoy = hoy.getDate();
-    const mesHoy = hoy.getMonth() + 1; // Los meses en JS van de 0 a 11
+  const hoy = new Date();
+  const [dia, mes] = fechaStr.split("/");
 
-    // Intentar parsear la fecha en diferentes formatos
-    const partes = fechaStr.split('/');
-    if (partes.length >= 2) {
-        const dia = parseInt(partes[0], 10);
-        const mes = parseInt(partes[1], 10);
-
-        return dia === diaHoy && mes === mesHoy;
-    }
-
-    return false;
+  return (
+    parseInt(dia) === hoy.getDate() &&
+    parseInt(mes) === hoy.getMonth() + 1
+  );
 }
 
 /**
