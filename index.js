@@ -19,7 +19,7 @@ async function obtenerDatosSheet() {
     console.log("📊 Obteniendo datos del Google Sheet...");
     console.log("📊 SHEET ID USADO:", process.env.SHEET_ID);
 
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SHEET_ID}/values/A2:Z?key=${process.env.GOOGLE_API_KEY}`;
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.SHEET_ID}/values/Configuración de Google Sheet para Base de Datos!A2:Z?key=${process.env.GOOGLE_API_KEY}`;
 
     const response = await axios.get(url);
 
