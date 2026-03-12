@@ -26,43 +26,18 @@ const PHONE_ID = process.env.PHONE_ID;
  * @returns {Promise<Array>} Array de objetos con los datos de las familias
  */
 async function obtenerDatosSheet() {
-    try {
-        console.log("📊 Obteniendo datos del Google Sheet...");
-        console.log("SHEET_ID:", process.env.SHEET_ID);
-        console.log("RANGE:", "'Configuración de Google Sheet para Base de Datos'!A:K");
-
-        const response = await sheets.spreadsheets.values.get({
-            spreadsheetId: process.env.SHEET_ID,
-            range: "'Configuración de Google Sheet para Base de Datos'!A:K",
-        });
-
-        console.log("✅ Filas:", response.data.values?.length);
-
-        const rows = response.data.values;
-        if (!rows || rows.length === 0) {
-            console.log('No se encontraron datos en la hoja');
-            return [];
-        }
-
-        // La primera fila contiene los encabezados
-        const headers = rows[0];
-
-        // Convertir las filas restantes en objetos
-        const datos = rows.slice(1).map(row => {
-            const obj = {};
-            headers.forEach((header, index) => {
-                obj[header] = row[index] || '';
-            });
-            return obj;
-        });
-
-        return datos;
-    } catch (error) {
-        console.error("❌ ERROR REAL:", error.response?.data || error.message);
-        console.error("ERROR STATUS:", error.response?.status);
-        console.error("ERROR DETAILS:", JSON.stringify(error.response?.data, null, 2));
-        throw error;
-    }
+  try {
+    console.log("📊 Obteniendo datos del Google Sheet...");
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId: process.env.SHEET_ID,
+      range: "'Configuración de Google Sheet para Base de Datos'!A:K",
+    });
+    console.log("✅ Filas:", response.data.values?.length);
+    return response.data.values || [];
+  } catch (error) {
+    console.error("❌ ERROR REAL:", error.response?.data || error.message);
+    throw error;
+  }
 }
 
 /**
